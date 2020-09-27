@@ -45,9 +45,10 @@ fun genetic(solutionLength: Int,
  * solution length == number of solutions in this population
  */
 private fun generateRandomSolutions(solutionLength: Int): Array<Solution> {
-    var index = 0
+    var index = -1
     return Array(solutionLength) {
-        Solution(solutionLength) { it == index++ }
+        index++
+        Solution(solutionLength) { it == index }
     }
 }
 
