@@ -28,12 +28,10 @@ fun main() {
     }
 
     val crossover = { parent1: Array<Boolean>, parent2: Array<Boolean> ->
-        val firstQuarter = parent1.slice(0 until 25)
-        val secondQuarter = parent2.slice(25 until 50)
-        val thirdQuarter = parent1.slice(50 until 75)
-        val fourthQuarter = parent2.slice(75 until 100)
-
-        firstQuarter.plus(secondQuarter).plus(thirdQuarter).plus(fourthQuarter).toTypedArray()
+        parent1.slice(0 until 25)
+                .plus(parent2.slice(25 until 50))
+                .plus(parent1.slice(50 until 75))
+                .plus(parent2.slice(75 until 100)).toTypedArray()
     }
 
     val mutation = { solution: Array<Boolean> ->

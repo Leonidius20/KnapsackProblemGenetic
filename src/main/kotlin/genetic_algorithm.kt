@@ -1,3 +1,6 @@
+import kotlin.random.Random
+import kotlin.random.nextInt
+
 private typealias Solution = Array<Boolean>
 private typealias Validator = (Solution) -> Boolean
 
@@ -10,34 +13,30 @@ fun genetic(solutionLength: Int,
             maxIterations: Int): Solution {
 
     val population = generateRandomSolutions(solutionLength)
+    population.sortByDescending(fitness)
 
     var iterationCounter = 0
     while (iterationCounter <= maxIterations) {
         iterationCounter++
 
-        // finding best and worst solutions
-        val (bestIndex, worstIndex)
-                = evaluateSolutions(population, fitness)
+        // taking the best half of the population to select parents from
+        val bestSolutions = population.sliceArray(0 until population.size / 2)
 
-        // selecting parents for a new solution
-        val parent1 = population[bestIndex]
+        // new solutions take places of the worst half of the population
+        for (index in population.size / 2 until population.size) {
+            val (parent1, parent2) = selectParents(bestSolutions, fitness)
 
-        var parent2 = population.random()
-        while (parent2.contentEquals(parent1)) {
-            parent2 = population.random() // potential endless loop?
+            val newSolution = localImprovement(mutation(crossover(parent1, parent2)))
+
+            if (!validator(newSolution)) continue
+
+            population[index] = newSolution
         }
 
-        // creating a new solution
-        val newSolution = localImprovement(mutation(crossover(parent1, parent2)))
-
-        // validating a new solution
-        if (!validator(newSolution)) continue
-
-        // replacing the worst solution with the new one
-        population[worstIndex] = newSolution
+        population.sortByDescending(fitness)
     }
 
-    return population[evaluateSolutions(population, fitness).bestIndex]
+    return population[0]
 }
 
 /**
@@ -76,4 +75,28 @@ private fun evaluateSolutions(population: Array<Solution>, fitness: (Solution) -
     }
 
     return BestAndWorstSolutions(bestIndex, worstIndex)
+}
+
+data class Parents(val parent1: Solution, val parent2: Solution)
+
+private fun selectParents(population: Array<Solution>, fitness: (Solution) -> Int): Parents {
+    val fitnessSum = population.sumBy(fitness)
+
+    fun selectParent(): Solution {
+        val threshold = Random.nextInt(0..fitnessSum)
+        var partialSum = 0
+
+        var result = population[0]
+        for (solution in population) {
+            partialSum += fitness(solution)
+            if (partialSum >= threshold) {
+                result = solution
+                break
+            }
+        }
+
+        return result
+    }
+
+    return Parents(selectParent(), selectParent())
 }
