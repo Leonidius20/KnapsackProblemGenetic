@@ -88,6 +88,7 @@ fun main() {
     file.createNewFile()
     val writer = file.printWriter()
 
+
     val callback = { iteration: Int, bestCost: Int ->
         if (iteration % 20 == 0) { // every 20 iterations
             writer.println("$iteration,$bestCost")
@@ -100,12 +101,11 @@ fun main() {
 
     writer.close()
 
-
-    println("Cost: ${fitness(result)}")
-
     var weight = 0
     result.forEachIndexed { index, value ->
         if (value) weight += items[index].weight
+        println("${items[index].cost}, ${items[index].weight}")
     }
-    println("Weight: $weight")
+    println("Total cost: ${fitness(result)}")
+    println("Total weight: $weight")
 }

@@ -12,7 +12,9 @@ class GeneticSolver(private val solutionLength: Int,
                     private val maxIterations: Int,
                     private val callback: (Int, Int) -> Unit) {
 
+
     private lateinit var population : Array<Solution>
+
 
     fun solve(): Solution {
         population = getFirstGeneration()
