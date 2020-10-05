@@ -7,12 +7,20 @@ const val NUMBER_OF_ITEMS = 100
 
 data class Item(val cost: Int, val weight: Int)
 
-val items = Array(NUMBER_OF_ITEMS) {
-    Item(cost = Random.nextInt(2, 31),
-        weight = Random.nextInt(1, 26))
-}
-
 fun main() {
+    val items = Array(NUMBER_OF_ITEMS) {
+        Item(cost = Random.nextInt(2..30), weight = Random.nextInt(1..25))
+    }
+
+    val itemsFile = File("items.csv")
+    itemsFile.createNewFile()
+    itemsFile.printWriter().use {
+        for (item in items) {
+            it.println("${item.cost},${item.weight}")
+        }
+    }
+
+
     val validator = { solution: Array<Boolean> ->
         var totalWeight = 0
 
@@ -32,6 +40,7 @@ fun main() {
         solution
     }
 
+
     val fitness = { solution: Array<Boolean> ->
         var sum = 0
         solution.forEachIndexed { index, value ->
@@ -39,6 +48,7 @@ fun main() {
         }
         sum
     }
+
 
     val crossover = { parent1: Array<Boolean>, parent2: Array<Boolean> ->
         arrayOf(parent1.slice(0 until 25)
@@ -52,6 +62,7 @@ fun main() {
                         .plus(parent1.slice(75 until 100)).toTypedArray())
     }
 
+
     val mutation = { solution: Array<Boolean> ->
         if (Random.nextInt(0..100) <= 5) { // 5% probability
             val index1 = solution.randomIndex()
@@ -61,40 +72,34 @@ fun main() {
         solution
     }
 
-    val fitnessToWeightRatio = { solution: Array<Boolean> ->
-        var fitness = 0.0
-        var weight = 0.0
-        solution.forEachIndexed { index, value ->
-            if (value) {
-                weight += items[index].weight
-                fitness += items[index].cost
+
+    val localImprovement = { solution: Array<Boolean> ->
+        for (index in solution.indices) {
+            if (!solution[index] && items[index].cost > 15 && items[index].weight < 12) {
+                solution[index] = true
+                break
             }
         }
-        fitness / weight
+        solution
     }
 
-    val localImprovement = { sol: Array<Boolean> ->
-        var result = sol
-
-        if (Random.nextInt(0..100) <= 5) { // 5% probability
-
-        }
-
-        result
-    }
 
     val file = File("data.csv")
     file.createNewFile()
     val writer = file.printWriter()
 
     val callback = { iteration: Int, bestCost: Int ->
-        writer.println("$iteration,$bestCost")
+        if (iteration % 20 == 0) { // every 20 iterations
+            writer.println("$iteration,$bestCost")
+        }
     }
+
 
     val result = GeneticSolver(solutionLength = NUMBER_OF_ITEMS, validator, fitness,
             crossover, mutation, localImprovement, maxIterations = 1000, callback).solve()
 
     writer.close()
+
 
     println("Cost: ${fitness(result)}")
 

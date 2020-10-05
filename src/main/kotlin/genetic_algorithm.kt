@@ -20,9 +20,7 @@ class GeneticSolver(private val solutionLength: Int,
         for (iteration in 0 until maxIterations) {
             population = getNextGeneration()
 
-            if (iteration % 20 == 0) { // every 20 iterations
-                callback(iteration, population.maxOf(fitness))
-            }
+            callback(iteration, population.maxOf(fitness))
         }
 
         return population.maxByOrNull(fitness)!!
